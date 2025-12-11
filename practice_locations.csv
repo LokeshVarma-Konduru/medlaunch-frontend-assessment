@@ -1,0 +1,6 @@
+Location Name,Street Address,City,State,ZIP Code,FTEs,Shifts,Miles to Main,Days Open
+Practice Location 1,"723 Healthcare Boulevard, Suite 120",Health Valley,TX,36391,42,2,35,"M, T, W, TH, F, SA, SU"
+Practice Location 2,"300 Health Way, Suite 177",Care Springs,FL,26258,51,1,18,"M, T, W, TH, F, SA, SU"
+Practice Location 3,"137 Health Plaza, Suite 315",Healthcare City,VA,31101,60,3,19,"M, T, W, TH, F, SA"
+Practice Location 4,"287 Care Boulevard, Suite 451",Wellness Grove,WA,13391,16,2,44,"M, W, F"
+Practice Location 5,"635 Clinical Street, Suite 210",Care Springs,IL,22036,59,1,19,"M, W, F"

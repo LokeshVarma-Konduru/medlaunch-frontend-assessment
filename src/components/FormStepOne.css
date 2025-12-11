@@ -1,0 +1,143 @@
+.form-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #4e4e4e;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #808080;
+  margin-top: -8px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #343434;
+}
+
+.required {
+  color: #d9534f;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: var(--font-family);
+  color: #333;
+  background-color: #fff;
+}
+
+.form-input:focus {
+  outline: 2px solid var(--primary-blue);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000000;
+  line-height: 1;
+}
+
+.email-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.email-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.refresh-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: #6c6c6c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-btn:hover {
+  color: #4a4a4a;
+}
+
+.email-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.link-button {
+  padding: 6px 16px;
+  border: 1px solid var(--primary-blue);
+  color: var(--primary-blue);
+  background: transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.link-button:hover {
+  background-color: rgba(0, 86, 163, 0.08);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: 100px;
+  background-color: #fbefc4;
+  color: #a16800;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-step {
+    gap: 40px;
+  }
+}
+
