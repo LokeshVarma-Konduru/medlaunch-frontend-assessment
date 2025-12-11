@@ -39,6 +39,7 @@ export const FormProvider = ({ children }) => {
           workPhone: '',
           cellPhone: '',
           email: '',
+          sameAsPrimary: false,
         },
       ],
       billingAddress: {
@@ -63,6 +64,10 @@ export const FormProvider = ({ children }) => {
       thrombolyticDates: [],
       thrombectomyDates: [],
     },
+    // Step 6: Review & Submit
+    step6: {
+      agreedToTerms: false,
+    },
   });
 
   const updateFormData = (step, data) => {
@@ -86,6 +91,70 @@ export const FormProvider = ({ children }) => {
   };
 
   const getAllFormData = () => formData;
+
+  // Validation regex patterns
+  const patterns = {
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    phone: /^[\d\s\-\(\)]{10,}$/,  // At least 10 digits, allows various formats
+    zipCode: /^\d{5}(-\d{4})?$/,  // 12345 or 12345-6789
+  };
+
+  // Helper to validate phone has at least 10 digits
+  const isValidPhone = (phone) => {
+    const digits = phone.replace(/\D/g, ''); // Remove non-digits
+    return digits.length >= 10;
+  };
+
+  // Validate specific step
+  const validateStep = (stepNumber) => {
+    switch (stepNumber) {
+      case 1:
+        return (
+          formData.step1.legalEntityName.trim() !== '' &&
+          formData.step1.dbaName.trim() !== '' &&
+          formData.step1.primaryContact.name.trim() !== '' &&
+          formData.step1.primaryContact.title.trim() !== '' &&
+          formData.step1.primaryContact.workPhone.trim() !== '' &&
+          isValidPhone(formData.step1.primaryContact.workPhone) &&
+          formData.step1.primaryContact.email.trim() !== '' &&
+          patterns.email.test(formData.step1.primaryContact.email)
+        );
+      
+      case 2:
+        return formData.step2.facilityType !== '';
+      
+      case 3:
+        // Only validate CEO contact (first contact) - others are optional
+        const ceoContact = formData.step3.leadershipContacts[0];
+        if (!ceoContact) return false;
+        
+        const ceoNameParts = ceoContact.name.trim().split(' ');
+        return (
+          ceoNameParts.length >= 2 &&
+          ceoNameParts[0] !== '' &&
+          ceoNameParts[1] !== '' &&
+          ceoContact.workPhone.trim() !== '' &&
+          isValidPhone(ceoContact.workPhone) &&
+          ceoContact.email.trim() !== '' &&
+          patterns.email.test(ceoContact.email)
+        );
+      
+      case 4:
+        return formData.step4.siteConfiguration !== '';
+      
+      case 5:
+        return (
+          formData.step5.services.length > 0 &&
+          formData.step5.standards.length > 0
+        );
+      
+      case 6:
+        return formData.step6.agreedToTerms === true;
+      
+      default:
+        return true;
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -113,6 +182,7 @@ export const FormProvider = ({ children }) => {
             workPhone: '',
             cellPhone: '',
             email: '',
+            sameAsPrimary: false,
           },
         ],
         billingAddress: {
@@ -135,6 +205,9 @@ export const FormProvider = ({ children }) => {
         thrombolyticDates: [],
         thrombectomyDates: [],
       },
+      step6: {
+        agreedToTerms: false,
+      },
     });
   };
 
@@ -144,6 +217,8 @@ export const FormProvider = ({ children }) => {
     updateNestedFormData,
     getAllFormData,
     resetForm,
+    validateStep,
+    patterns,
   };
 
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>;

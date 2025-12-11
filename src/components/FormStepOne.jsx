@@ -84,24 +84,26 @@ function FormStepOne() {
             value={localData.dbaName}
             onChange={handleChange}
           />
+          
+          <label className="checkbox">
+            <input 
+              type="checkbox" 
+              name="sameAsLegal" 
+              checked={localData.sameAsLegal}
+              onChange={handleChange}
+            />
+            <span>Same as Legal Entity Name</span>
+          </label>
         </div>
-
-        <label className="checkbox">
-          <input 
-            type="checkbox" 
-            name="sameAsLegal" 
-            checked={localData.sameAsLegal}
-            onChange={handleChange}
-          />
-          <span>Same as Legal Entity Name</span>
-        </label>
       </section>
 
       <section className="section">
-        <h2 className="section-title">Primary Contact Information</h2>
-        <p className="section-subtitle">
-          Primary contact receives all DNV Healthcare official communications
-        </p>
+        <div className="section-header">
+          <h2 className="section-title">Primary Contact Information</h2>
+          <p className="section-subtitle">
+            Primary contact receives all DNV Healthcare official communications
+          </p>
+        </div>
 
         <div className="form-row">
           <div className="form-group">
@@ -181,7 +183,7 @@ function FormStepOne() {
               Email <span className="required">*</span>
             </label>
             <button type="button" className="refresh-btn" aria-label="Refresh">
-              ↻
+              <img src="/Refresh.svg" alt="Refresh" />
             </button>
           </div>
           <input 

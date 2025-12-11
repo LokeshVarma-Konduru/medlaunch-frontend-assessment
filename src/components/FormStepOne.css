@@ -7,20 +7,27 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .section-title {
   font-size: 24px;
   font-weight: 700;
   color: #4e4e4e;
+  margin: 0;
 }
 
 .section-subtitle {
   font-size: 14px;
   font-weight: 500;
   color: #808080;
-  margin-top: -8px;
+  margin: 0;
 }
 
 .form-group {
@@ -46,7 +53,7 @@
   border-radius: 4px;
   font-size: 14px;
   font-family: var(--font-family);
-  color: #333;
+  color: #000000;
   background-color: #fff;
 }
 
@@ -68,6 +75,7 @@
   font-weight: 500;
   color: #000000;
   line-height: 1;
+  margin-top: 4px;
 }
 
 .email-group {
@@ -83,19 +91,25 @@
 }
 
 .refresh-btn {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background: transparent;
   border: none;
-  font-size: 16px;
-  color: #6c6c6c;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  padding: 0;
 }
 
-.refresh-btn:hover {
-  color: #4a4a4a;
+.refresh-btn img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.refresh-btn:hover img {
+  opacity: 1;
 }
 
 .email-actions {

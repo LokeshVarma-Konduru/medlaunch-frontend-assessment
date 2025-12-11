@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useFormContext } from '../context/FormContext';
 import './FormStepSix.css';
 
-function FormStepSix() {
-  const { formData } = useFormContext();
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+function FormStepSix({ onNavigateToStep }) {
+  const { formData, updateFormData } = useFormContext();
   const [expandedSections, setExpandedSections] = useState({
     basicInfo: true,
     facilityDetails: true,
@@ -21,6 +20,12 @@ function FormStepSix() {
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const handleEdit = (stepNumber) => {
+    if (onNavigateToStep) {
+      onNavigateToStep(stepNumber);
+    }
   };
 
   // Helper function to get facility type display name
@@ -192,13 +197,8 @@ function FormStepSix() {
     }
   };
 
-  const handleSubmit = () => {
-    if (agreedToTerms) {
-      console.log('Form Submitted:', mockData);
-      alert('Form submitted successfully! Check console for data.');
-    } else {
-      alert('Please certify that all information is accurate.');
-    }
+  const handleAgreementChange = (e) => {
+    updateFormData('step6', { agreedToTerms: e.target.checked });
   };
 
   return (
@@ -223,7 +223,7 @@ function FormStepSix() {
             </button>
             <h3 className="review-section-title">Basic Information</h3>
           </div>
-          <button type="button" className="edit-btn" onClick={(e) => e.stopPropagation()}>Edit</button>
+          <button type="button" className="edit-btn" onClick={(e) => { e.stopPropagation(); handleEdit(1); }}>Edit</button>
         </div>
         {expandedSections.basicInfo && (
           <div className="review-content">
@@ -276,7 +276,7 @@ function FormStepSix() {
             </button>
             <h3 className="review-section-title">Facility Details</h3>
           </div>
-          <button type="button" className="edit-btn" onClick={(e) => e.stopPropagation()}>Edit</button>
+          <button type="button" className="edit-btn" onClick={(e) => { e.stopPropagation(); handleEdit(2); }}>Edit</button>
         </div>
         {expandedSections.facilityDetails && (
           <div className="review-content">
@@ -306,7 +306,7 @@ function FormStepSix() {
             </button>
             <h3 className="review-section-title">Leadership Contacts</h3>
           </div>
-          <button type="button" className="edit-btn" onClick={(e) => e.stopPropagation()}>Edit</button>
+          <button type="button" className="edit-btn" onClick={(e) => { e.stopPropagation(); handleEdit(3); }}>Edit</button>
         </div>
         {expandedSections.leadershipContacts && (
           <div className="review-content">
@@ -364,7 +364,7 @@ function FormStepSix() {
             </button>
             <h3 className="review-section-title">Site Information</h3>
           </div>
-          <button type="button" className="edit-btn" onClick={(e) => e.stopPropagation()}>Edit</button>
+          <button type="button" className="edit-btn" onClick={(e) => { e.stopPropagation(); handleEdit(4); }}>Edit</button>
         </div>
         {expandedSections.siteInformation && (
           <div className="review-content">
@@ -372,20 +372,22 @@ function FormStepSix() {
             <span className="review-label">Site Configuration</span>
             <span className="review-value">{displayData.siteInformation.configuration}</span>
           </div>
-          <div className="review-row">
-            <span className="review-label">Input Method</span>
-            <div className="review-value">
-              <div>{displayData.siteInformation.inputMethod}</div>
-              {displayData.siteInformation.locations.map((location, index) => (
-                <div key={index} className="location-block">
-                  <h4 className="location-title">{location.name}</h4>
-                  <p className="location-detail">{location.address}</p>
-                  <p className="location-detail">FTEs: {location.ftes} | Shifts: {location.shifts} | Miles to Main: {location.milesToMain}</p>
-                  <p className="location-detail">Days Open: {location.daysOpen}</p>
-                </div>
-              ))}
+          {formData?.step4?.siteConfiguration === 'multiple' && (
+            <div className="review-row">
+              <span className="review-label">Input Method</span>
+              <div className="review-value">
+                <div>{displayData.siteInformation.inputMethod}</div>
+                {displayData.siteInformation.locations.map((location, index) => (
+                  <div key={index} className="location-block">
+                    <h4 className="location-title">{location.name}</h4>
+                    <p className="location-detail">{location.address}</p>
+                    <p className="location-detail">FTEs: {location.ftes} | Shifts: {location.shifts} | Miles to Main: {location.milesToMain}</p>
+                    <p className="location-detail">Days Open: {location.daysOpen}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         )}
       </section>
@@ -408,7 +410,7 @@ function FormStepSix() {
             </button>
             <h3 className="review-section-title">Services & Certifications</h3>
           </div>
-          <button type="button" className="edit-btn" onClick={(e) => e.stopPropagation()}>Edit</button>
+          <button type="button" className="edit-btn" onClick={(e) => { e.stopPropagation(); handleEdit(5); }}>Edit</button>
         </div>
         {expandedSections.servicesAndCertifications && (
           <div className="review-content">
@@ -434,7 +436,7 @@ function FormStepSix() {
           </div>
           <div className="review-row">
             <span className="review-label">Date of Application</span>
-            <span className="review-value">{displayData.servicesAndCertifications.dateOfApplication}</span>
+            <span className="review-value">{displayData.servicesAndCertifications.applicationDate}</span>
           </div>
           <div className="review-row">
             <span className="review-label">Expiration Date of Current Stroke Certification</span>
@@ -462,8 +464,8 @@ function FormStepSix() {
         <label className="checkbox-agreement">
           <input
             type="checkbox"
-            checked={agreedToTerms}
-            onChange={(e) => setAgreedToTerms(e.target.checked)}
+            checked={formData.step6.agreedToTerms}
+            onChange={handleAgreementChange}
           />
           <span className="checkbox-label">
             I certify that all information provided is accurate and complete to the best of my knowledge

@@ -6,7 +6,7 @@
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 6px;
 }
 
 .contact-card-title {
@@ -40,7 +40,7 @@
   border-radius: 4px;
   font-size: 14px;
   font-family: var(--font-family);
-  color: #333;
+  color: #000000;
   background-color: #fff;
 }
 
@@ -61,6 +61,7 @@
   font-size: 16px;
   font-weight: 500;
   color: #000000;
+  margin-bottom: 8px;
 }
 
 .contact-card .checkbox input[type="checkbox"] {
@@ -72,11 +73,10 @@
 /* Billing Address Sub-section */
 .billing-section {
   margin-top: 16px;
-  padding-top: 24px;
-  border-top: 1px solid #e8e8e8;
+  padding-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
 }
 
 .billing-title {

@@ -1,7 +1,14 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .radio-group {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 12px;
 }
 
 .radio-option {

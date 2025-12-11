@@ -153,6 +153,7 @@
   font-family: 'Nunito Sans', sans-serif;
   width: fit-content;
   display: inline-flex;
+  margin-bottom: 24px;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
@@ -335,7 +336,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .form-group {
@@ -370,7 +371,7 @@
   font-size: 14px;
   font-family: 'Nunito Sans', sans-serif;
   background-color: #FFFFFF;
-  color: #808080;
+  color: #000000;
 }
 
 .form-input::placeholder {

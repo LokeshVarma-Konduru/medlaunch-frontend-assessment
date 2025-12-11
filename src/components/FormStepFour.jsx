@@ -28,6 +28,47 @@ function FormStepFour() {
     });
   }, [selectedOption, uploadMethod, uploadedFiles]);
 
+  // Parse CSV file
+  const parseCSV = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target.result;
+          const lines = text.split('\n').filter(line => line.trim());
+          const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+          
+          const locations = lines.slice(1).map(line => {
+            const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+            const cleanValues = values.map(v => v.trim().replace(/^"|"$/g, ''));
+            
+            // Combine address parts for display
+            const street = cleanValues[1] || '';
+            const city = cleanValues[2] || '';
+            const state = cleanValues[3] || '';
+            const zipCode = cleanValues[4] || '';
+            const fullAddress = `${street}, ${city}, ${state} ${zipCode}`;
+            
+            return {
+              name: cleanValues[0] || 'Unknown Location',
+              address: fullAddress,
+              ftes: cleanValues[5] || '0',
+              shifts: cleanValues[6] || '0',
+              milesToMain: cleanValues[7] || '0',
+              daysOpen: cleanValues[8] || ''
+            };
+          });
+          
+          resolve(locations);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  };
+
   const handleFileUpload = (files) => {
     const fileArray = Array.from(files);
     
@@ -43,12 +84,24 @@ function FormStepFour() {
     }
 
     // Add files to uploading state with progress
-    const newUploadingFiles = validFiles.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
-      progress: 0
-    }));
+    const newUploadingFiles = validFiles.map(file => {
+      // Format file size - show KB for files under 1MB
+      let fileSize;
+      const sizeInMB = file.size / (1024 * 1024);
+      if (sizeInMB < 1) {
+        fileSize = (file.size / 1024).toFixed(2) + ' KB';
+      } else {
+        fileSize = sizeInMB.toFixed(2) + ' MB';
+      }
+      
+      return {
+        id: Date.now() + Math.random(),
+        name: file.name,
+        size: fileSize,
+        progress: 0,
+        rawFile: file // Store the actual file for parsing
+      };
+    });
 
     setUploadingFiles(prev => [...prev, ...newUploadingFiles]);
 
@@ -67,10 +120,26 @@ function FormStepFour() {
         if (progress >= 100) {
           clearInterval(interval);
           
-          // Move to uploaded files
-          setTimeout(() => {
+          // Move to uploaded files and parse CSV
+          setTimeout(async () => {
             setUploadedFiles(prev => [...prev, fileObj]);
             setUploadingFiles(prev => prev.filter(f => f.id !== fileObj.id));
+            
+            // Parse CSV file if it exists
+            if (fileObj.rawFile && fileObj.name.endsWith('.csv')) {
+              try {
+                const locations = await parseCSV(fileObj.rawFile);
+                // Update formData with parsed locations
+                updateFormData('step4', {
+                  siteConfiguration: selectedOption,
+                  inputMethod: uploadMethod,
+                  locations: locations,
+                  uploadedFile: fileObj.name,
+                });
+              } catch (error) {
+                console.error('Error parsing CSV:', error);
+              }
+            }
           }, 300);
         }
       }, 200);
@@ -169,15 +238,15 @@ function FormStepFour() {
 
           <div className="upload-method-card">
             <label 
-              className={`upload-option ${uploadMethod === 'csv' ? 'selected' : ''}`}
-              onClick={() => setUploadMethod('csv')}
+              className={`upload-option ${uploadMethod === 'file-upload' ? 'selected' : ''}`}
+              onClick={() => setUploadMethod('file-upload')}
             >
               <input
                 type="radio"
                 name="uploadMethod"
-                value="csv"
-                checked={uploadMethod === 'csv'}
-                onChange={() => setUploadMethod('csv')}
+                value="file-upload"
+                checked={uploadMethod === 'file-upload'}
+                onChange={() => setUploadMethod('file-upload')}
               />
               <div className="upload-option-content">
                 <h3 className="upload-option-title">Upload CSV / Excel</h3>
@@ -187,7 +256,7 @@ function FormStepFour() {
           </div>
 
           {/* Show upload area when CSV option is selected */}
-          {uploadMethod === 'csv' && (
+          {uploadMethod === 'file-upload' && (
             <div className="upload-wrapper">
               <div className="upload-area-container">
                 <div 

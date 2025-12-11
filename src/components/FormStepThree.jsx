@@ -5,35 +5,47 @@ import './FormStepThree.css';
 function FormStepThree() {
   const { formData, updateFormData } = useFormContext();
   
+  // Load CEO data from context
+  const ceoContact = formData?.step3?.leadershipContacts?.[0] || {};
+  const [ceoFirstName, ceoLastName] = (ceoContact.name || '').split(' ');
   const [ceoData, setCeoData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    email: '',
-    sameAsPrimary: false,
+    firstName: ceoFirstName || '',
+    lastName: ceoLastName || '',
+    phone: ceoContact.workPhone || '',
+    email: ceoContact.email || '',
+    sameAsPrimary: ceoContact.sameAsPrimary || false,
   });
 
+  // Load Director data from context
+  const directorContact = formData?.step3?.leadershipContacts?.[1] || {};
+  const [dirFirstName, dirLastName] = (directorContact.name || '').split(' ');
   const [directorData, setDirectorData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    email: '',
-    sameAsPrimary: false,
+    firstName: dirFirstName || '',
+    lastName: dirLastName || '',
+    phone: directorContact.workPhone || '',
+    email: directorContact.email || '',
+    sameAsPrimary: directorContact.sameAsPrimary || false,
   });
 
+  // Load Invoicing data from context
+  const invoicingContact = formData?.step3?.leadershipContacts?.[2] || {};
+  const [invFirstName, invLastName] = (invoicingContact.name || '').split(' ');
   const [invoicingData, setInvoicingData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    email: '',
-    sameAsPrimary: false,
+    firstName: invFirstName || '',
+    lastName: invLastName || '',
+    phone: invoicingContact.workPhone || '',
+    email: invoicingContact.email || '',
+    sameAsPrimary: invoicingContact.sameAsPrimary || false,
   });
 
+  // Load billing address from context
+  const savedAddress = formData?.step3?.billingAddress?.address || '';
+  const addressParts = savedAddress.split(', ');
   const [billingAddress, setBillingAddress] = useState({
-    streetAddress: '',
-    city: '',
-    state: '',
-    zipCode: '',
+    streetAddress: addressParts[0] || '',
+    city: addressParts[1] || '',
+    state: addressParts[2]?.split(' ')[0] || '',
+    zipCode: addressParts[2]?.split(' ')[1] || '',
   });
 
   // Handle "Same as Primary Contact" checkboxes
@@ -46,6 +58,15 @@ function FormStepThree() {
         lastName: lastName || '',
         phone: formData.step1.primaryContact.workPhone,
         email: formData.step1.primaryContact.email,
+      }));
+    } else {
+      // Clear fields when unchecked
+      setCeoData(prev => ({
+        ...prev,
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: '',
       }));
     }
   }, [ceoData.sameAsPrimary, formData.step1.primaryContact]);
@@ -60,6 +81,15 @@ function FormStepThree() {
         phone: formData.step1.primaryContact.workPhone,
         email: formData.step1.primaryContact.email,
       }));
+    } else {
+      // Clear fields when unchecked
+      setDirectorData(prev => ({
+        ...prev,
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: '',
+      }));
     }
   }, [directorData.sameAsPrimary, formData.step1.primaryContact]);
 
@@ -73,11 +103,29 @@ function FormStepThree() {
         phone: formData.step1.primaryContact.workPhone,
         email: formData.step1.primaryContact.email,
       }));
+    } else {
+      // Clear fields when unchecked
+      setInvoicingData(prev => ({
+        ...prev,
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: '',
+      }));
     }
   }, [invoicingData.sameAsPrimary, formData.step1.primaryContact]);
 
   // Update context whenever local data changes
   useEffect(() => {
+    // Format address only if there are values
+    const addressParts = [
+      billingAddress.streetAddress,
+      billingAddress.city,
+      `${billingAddress.state} ${billingAddress.zipCode}`.trim()
+    ].filter(part => part); // Remove empty parts
+    
+    const formattedAddress = addressParts.join(', ');
+    
     updateFormData('step3', {
       leadershipContacts: [
         {
@@ -86,6 +134,7 @@ function FormStepThree() {
           workPhone: ceoData.phone,
           cellPhone: '',
           email: ceoData.email,
+          sameAsPrimary: ceoData.sameAsPrimary,
         },
         {
           name: `${directorData.firstName} ${directorData.lastName}`.trim(),
@@ -93,6 +142,7 @@ function FormStepThree() {
           workPhone: directorData.phone,
           cellPhone: '',
           email: directorData.email,
+          sameAsPrimary: directorData.sameAsPrimary,
         },
         {
           name: `${invoicingData.firstName} ${invoicingData.lastName}`.trim(),
@@ -100,11 +150,12 @@ function FormStepThree() {
           workPhone: invoicingData.phone,
           cellPhone: '',
           email: invoicingData.email,
+          sameAsPrimary: invoicingData.sameAsPrimary,
         },
       ],
       billingAddress: {
         sameAsPrimary: false,
-        address: `${billingAddress.streetAddress}, ${billingAddress.city}, ${billingAddress.state} ${billingAddress.zipCode}`.trim(),
+        address: formattedAddress,
       },
     });
   }, [ceoData, directorData, invoicingData, billingAddress]);

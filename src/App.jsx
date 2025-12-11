@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFormContext } from './context/FormContext';
 import Header from './components/Header';
 import ProgressBar from './components/ProgressBar';
@@ -22,8 +22,13 @@ const steps = [
 ];
 
 function App() {
-  const { getAllFormData } = useFormContext();
+  const { getAllFormData, validateStep } = useFormContext();
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Scroll to top whenever step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
   const handlePrevious = () => {
     if (currentStep > 1) {
@@ -32,6 +37,12 @@ function App() {
   };
 
   const handleContinue = () => {
+    // Validate current step before proceeding
+    if (!validateStep(currentStep)) {
+      alert('Please fill in all required fields correctly before continuing.');
+      return;
+    }
+
     // If on last step (Review & Submit), handle submission
     if (currentStep === steps.length) {
       handleSubmit();
@@ -59,6 +70,10 @@ function App() {
     alert('Form submitted successfully! Check the console (F12) to see the complete form data.');
   };
 
+  const navigateToStep = (stepNumber) => {
+    setCurrentStep(stepNumber);
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
@@ -72,7 +87,7 @@ function App() {
       case 5:
         return <FormStepFive />;
       case 6:
-        return <FormStepSix />;
+        return <FormStepSix onNavigateToStep={navigateToStep} />;
       default:
         return <div>Step {currentStep} - Coming soon</div>;
     }

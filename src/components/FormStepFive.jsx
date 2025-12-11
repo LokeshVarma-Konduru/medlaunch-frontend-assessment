@@ -1,16 +1,20 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useFormContext } from '../context/FormContext';
 import './FormStepFive.css';
 
 function FormStepFive() {
+  const { formData, updateFormData } = useFormContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedServices, setSelectedServices] = useState([]);
-  const [selectedStandards, setSelectedStandards] = useState([]);
-  const [thrombolyticDates, setThrombolyticDates] = useState([]);
-  const [thrombectomyDates, setThrombectomyDates] = useState([]);
+  const [selectedServices, setSelectedServices] = useState(formData?.step5?.services || []);
+  const [selectedStandards, setSelectedStandards] = useState(formData?.step5?.standards || []);
+  const [expirationDate, setExpirationDate] = useState(formData?.step5?.expirationDate || '');
+  const [applicationDate, setApplicationDate] = useState(formData?.step5?.applicationDate || '');
+  const [thrombolyticDates, setThrombolyticDates] = useState(formData?.step5?.thrombolyticDates || []);
+  const [thrombectomyDates, setThrombectomyDates] = useState(formData?.step5?.thrombectomyDates || []);
   const [thrombolyticInputType, setThrombolyticInputType] = useState('text');
   const [thrombectomyInputType, setThrombectomyInputType] = useState('text');
   const [showOtherService, setShowOtherService] = useState(false);
-  const [otherServiceValue, setOtherServiceValue] = useState('');
+  const [otherServiceValue, setOtherServiceValue] = useState(formData?.step5?.otherService || '');
   const [activeTab, setActiveTab] = useState('All Services');
 
   // Refs for date inputs
@@ -18,6 +22,19 @@ function FormStepFive() {
   const applicationDateRef = useRef(null);
   const thrombolyticDatesRef = useRef(null);
   const thrombectomyDatesRef = useRef(null);
+
+  // Sync local state to global formContext
+  useEffect(() => {
+    updateFormData('step5', {
+      services: selectedServices,
+      otherService: otherServiceValue,
+      standards: selectedStandards,
+      expirationDate: expirationDate,
+      applicationDate: applicationDate,
+      thrombolyticDates: thrombolyticDates,
+      thrombectomyDates: thrombectomyDates,
+    });
+  }, [selectedServices, selectedStandards, expirationDate, applicationDate, thrombolyticDates, thrombectomyDates, otherServiceValue]);
 
   const allServices = {
     'Emergency & Critical Care': {
@@ -282,7 +299,9 @@ function FormStepFive() {
               <input 
                 ref={expirationDateRef}
                 type="date" 
-                className="form-input" 
+                className="form-input"
+                value={expirationDate}
+                onChange={(e) => setExpirationDate(e.target.value)}
               />
               <img 
                 src="/calendar.svg" 
@@ -298,7 +317,9 @@ function FormStepFive() {
               <input 
                 ref={applicationDateRef}
                 type="date" 
-                className="form-input" 
+                className="form-input"
+                value={applicationDate}
+                onChange={(e) => setApplicationDate(e.target.value)}
               />
               <img 
                 src="/calendar.svg" 
