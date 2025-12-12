@@ -15,6 +15,10 @@ npm run dev
 
 The application will run on `http://localhost:5173`
 
+### Testing CSV Upload
+
+A sample CSV file (`practice_locations.csv`) is included in the project root for testing the file upload feature in Stage 4 (Site Information).
+
 ## Tech Stack
 
 - React 18 with JavaScript
