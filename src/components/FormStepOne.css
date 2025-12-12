@@ -61,6 +61,22 @@
   outline: 2px solid var(--primary-blue);
 }
 
+.form-input.error {
+  border-color: #d9534f;
+}
+
+.form-input.error:focus {
+  outline: 2px solid #d9534f;
+}
+
+.error-message {
+  display: block;
+  color: #d9534f;
+  font-size: 13px;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -120,8 +136,8 @@
 
 .link-button {
   padding: 6px 16px;
-  border: 1px solid var(--primary-blue);
-  color: var(--primary-blue);
+  border: 1px solid #0056A3;
+  color: #0056A3;
   background: transparent;
   border-radius: 4px;
   font-size: 14px;

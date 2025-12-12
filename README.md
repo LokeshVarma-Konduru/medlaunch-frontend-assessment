@@ -1,16 +1,128 @@
-# React + Vite
+# DNV Healthcare Multi-Step Form
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A multi-step form application for DNV Healthcare quote requests, built with React.
 
-Currently, two official plugins are available:
+## Live Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Deployed on Vercel:** [https://medlaunch-frontend-assessment.vercel.app/](https://medlaunch-frontend-assessment.vercel.app/)
 
-## React Compiler
+## Installation & Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+The application will run on `http://localhost:5173`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+
+- React 18 with JavaScript
+- React Context API for state management
+- Pure CSS (no UI libraries)
+- Vite as build tool
+- PapaParse for CSV parsing
+- ESLint for code quality
+
+## Features
+
+### Core Functionality
+- 6-step form workflow (Quote Request → Facility Details → Leadership Contacts → Site Information → Services & Certifications → Review & Submit)
+- Form data persists across all steps
+- Navigation between steps (Next/Previous)
+- Form submission logs data to console
+
+### Form Validation
+- Required field validation
+- Email format validation
+- Phone number validation (10 digits)
+- ZIP code validation (5 digits)
+- Inline error messages with auto-scroll to errors
+
+### Additional Features
+- Responsive design (mobile-friendly at 768px breakpoint)
+- CSV file upload for multiple locations
+- "Same as Primary Contact" auto-fill functionality
+- Collapsible sections in review step
+- File size display and parsing
+
+## Project Structure
+
+```
+medlaunch-frontend-assessment/
+├── public/
+│   ├── calendar.svg
+│   ├── Document.svg
+│   ├── manage-accounts.png
+│   ├── Refresh.svg
+│   ├── Upload.svg
+│   └── vite.svg
+├── src/
+│   ├── components/
+│   │   ├── ActionBar.jsx
+│   │   ├── ActionBar.css
+│   │   ├── FormStepOne.jsx
+│   │   ├── FormStepOne.css
+│   │   ├── FormStepTwo.jsx
+│   │   ├── FormStepTwo.css
+│   │   ├── FormStepThree.jsx
+│   │   ├── FormStepThree.css
+│   │   ├── FormStepFour.jsx
+│   │   ├── FormStepFour.css
+│   │   ├── FormStepFive.jsx
+│   │   ├── FormStepFive.css
+│   │   ├── FormStepSix.jsx
+│   │   ├── FormStepSix.css
+│   │   ├── Header.jsx
+│   │   ├── Header.css
+│   │   ├── ProgressBar.jsx
+│   │   ├── ProgressBar.css
+│   │   ├── SupportChat.jsx
+│   │   └── SupportChat.css
+│   ├── context/
+│   │   └── FormContext.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.jsx
+├── eslint.config.js
+├── index.html
+├── package.json
+├── package-lock.json
+├── vite.config.js
+└── README.md
+```
+
+## Development Approach
+
+**State Management:** Used React Context API to share form data across all steps. Each step maintains local state for UI interactions and syncs to the global context for persistence.
+
+**Component Design:** Created modular components with single responsibility. Reusable components include Header, ProgressBar, ActionBar, and SupportChat.
+
+**Validation:** Implemented step-specific validation that triggers only when the user attempts to proceed. Errors display inline below fields with visual indicators.
+
+**Responsive Design:** Used CSS Flexbox and Grid with media queries at 768px for mobile layouts.
+
+## Assumptions
+
+- Email verification badge is for UI purposes only (no backend verification)
+- CSV upload processes files client-side
+- Stage 4 and Stage 5 fields are optional (no asterisks in Figma design)
+- Phone numbers accept 10-digit US format
+- Form submission logs to console instead of API call
+
+## Known Limitations
+
+- No backend integration or API calls
+- Form data clears on page refresh (no persistence)
+- CSV parsing expects specific column format
+- Tested primarily on Chrome browser
+- Basic accessibility implemented but not fully WCAG compliant
+
+## Build for Production
+
+```bash
+npm run build
+```
+
+Output will be in the `dist/` directory.

@@ -48,6 +48,24 @@
   outline: 2px solid var(--primary-blue);
 }
 
+.contact-card .form-input.error,
+.form-input.error {
+  border-color: #d9534f;
+}
+
+.contact-card .form-input.error:focus,
+.form-input.error:focus {
+  outline: 2px solid #d9534f;
+}
+
+.error-message {
+  display: block;
+  color: #d9534f;
+  font-size: 13px;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
 .contact-card .form-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

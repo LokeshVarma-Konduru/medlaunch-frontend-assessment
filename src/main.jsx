@@ -7,7 +7,7 @@ import { FormProvider } from './context/FormContext'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <FormProvider>
-      <App />
+    <App />
     </FormProvider>
   </StrictMode>,
 )

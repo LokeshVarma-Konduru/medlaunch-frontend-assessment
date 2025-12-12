@@ -1,6 +1,6 @@
 import './ActionBar.css';
 
-function ActionBar({ currentStep, totalSteps, onPrevious, onSave, onContinue }) {
+function ActionBar({ currentStep, totalSteps, onPrevious, onSave, onContinue, onExit }) {
   const isLastStep = currentStep === totalSteps;
   
   return (
@@ -9,7 +9,7 @@ function ActionBar({ currentStep, totalSteps, onPrevious, onSave, onContinue }) 
         <button 
           type="button" 
           className="btn btn-outline"
-          onClick={currentStep === 1 ? onSave : onPrevious}
+          onClick={currentStep === 1 ? onExit : onPrevious}
         >
           {currentStep === 1 ? 'Exit' : 'Previous'}
         </button>
@@ -17,9 +17,9 @@ function ActionBar({ currentStep, totalSteps, onPrevious, onSave, onContinue }) 
 
       <div className="action-center">
         {!isLastStep && (
-          <button type="button" className="btn btn-solid" onClick={onSave}>
-            Save
-          </button>
+        <button type="button" className="btn btn-solid" onClick={onSave}>
+          Save
+        </button>
         )}
         <button type="button" className="btn btn-solid" onClick={onContinue}>
           {isLastStep ? 'Submit Application' : 'Continue'}

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFormContext } from '../context/FormContext';
 import './FormStepSix.css';
 
 function FormStepSix({ onNavigateToStep }) {
-  const { formData, updateFormData } = useFormContext();
+  const { formData, updateFormData, validationTrigger } = useFormContext();
   const [expandedSections, setExpandedSections] = useState({
     basicInfo: true,
     facilityDetails: true,
@@ -11,6 +11,10 @@ function FormStepSix({ onNavigateToStep }) {
     siteInformation: true,
     servicesAndCertifications: true
   });
+  
+  const [showCheckboxError, setShowCheckboxError] = useState(false);
+  // Initialize prevTrigger with current count to avoid showing error on mount
+  const [prevTrigger, setPrevTrigger] = useState(validationTrigger?.count || 0);
 
   // Debug: Log formData to console
   console.log('FormStepSix - formData:', formData);
@@ -197,8 +201,33 @@ function FormStepSix({ onNavigateToStep }) {
     }
   };
 
+  // Listen for validation trigger - show error if checkbox not checked
+  useEffect(() => {
+    // Only validate if this trigger is for Step 6
+    if (validationTrigger.step === 6 && validationTrigger.count > prevTrigger) {
+      setPrevTrigger(validationTrigger.count);
+      
+      // Show error if checkbox not checked
+      if (!formData.step6.agreedToTerms) {
+        setShowCheckboxError(true);
+        
+        // Scroll to checkbox
+        setTimeout(() => {
+          const checkbox = document.querySelector('.checkbox-agreement');
+          if (checkbox) {
+            checkbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+  }, [validationTrigger]);
+
   const handleAgreementChange = (e) => {
     updateFormData('step6', { agreedToTerms: e.target.checked });
+    // Clear error when checkbox is checked
+    if (e.target.checked) {
+      setShowCheckboxError(false);
+    }
   };
 
   return (
@@ -246,9 +275,7 @@ function FormStepSix({ onNavigateToStep }) {
                 </p>
                 <p className="contact-detail">
                   Email: {displayData.basicInfo.primaryContact.email}
-                  {displayData.basicInfo.primaryContact.emailVerified && (
-                    <span className="verified-badge">Verified</span>
-                  )}
+                  <span className="verified-badge">Verified</span>
                 </p>
                 <p className="contact-detail">Address: {displayData.basicInfo.primaryContact.address}</p>
               </div>
@@ -417,21 +444,29 @@ function FormStepSix({ onNavigateToStep }) {
           <div className="review-row">
             <span className="review-label">Services Provided</span>
             <div className="review-value">
-              <div className="pills-display">
-                {displayData.servicesAndCertifications.services.map((service, index) => (
-                  <span key={index} className="display-pill">{service}</span>
-                ))}
-              </div>
+              {displayData.servicesAndCertifications.services.length > 0 ? (
+                <div className="pills-display">
+                  {displayData.servicesAndCertifications.services.map((service, index) => (
+                    <span key={index} className="display-pill">{service}</span>
+                  ))}
+                </div>
+              ) : (
+                <span>Not provided</span>
+              )}
             </div>
           </div>
           <div className="review-row">
             <span className="review-label">Standards to Apply</span>
             <div className="review-value">
-              <div className="pills-display">
-                {displayData.servicesAndCertifications.standards.map((standard, index) => (
-                  <span key={index} className="display-pill bold">{standard}</span>
-                ))}
-              </div>
+              {displayData.servicesAndCertifications.standards.length > 0 ? (
+                <div className="pills-display">
+                  {displayData.servicesAndCertifications.standards.map((standard, index) => (
+                    <span key={index} className="display-pill bold">{standard}</span>
+                  ))}
+                </div>
+              ) : (
+                <span>Not provided</span>
+              )}
             </div>
           </div>
           <div className="review-row">
@@ -445,13 +480,21 @@ function FormStepSix({ onNavigateToStep }) {
           <div className="review-row">
             <span className="review-label">Dates of last twenty-five thrombolytic administrations</span>
             <div className="review-value">
-              <p className="dates-list">{displayData.servicesAndCertifications.thrombolyticDates}</p>
+              {displayData.servicesAndCertifications.thrombolyticDates === 'Not provided' ? (
+                <span>{displayData.servicesAndCertifications.thrombolyticDates}</span>
+              ) : (
+                <p className="dates-list">{displayData.servicesAndCertifications.thrombolyticDates}</p>
+              )}
             </div>
           </div>
           <div className="review-row">
             <span className="review-label">Dates of last fifteen thrombectomies</span>
             <div className="review-value">
-              <p className="dates-list">{displayData.servicesAndCertifications.thrombectomyDates}</p>
+              {displayData.servicesAndCertifications.thrombectomyDates === 'Not provided' ? (
+                <span>{displayData.servicesAndCertifications.thrombectomyDates}</span>
+              ) : (
+                <p className="dates-list">{displayData.servicesAndCertifications.thrombectomyDates}</p>
+              )}
             </div>
           </div>
         </div>
@@ -461,16 +504,19 @@ function FormStepSix({ onNavigateToStep }) {
       {/* Ready to Submit */}
       <section className="submit-section">
         <h3 className="submit-title">Ready to Submit?</h3>
-        <label className="checkbox-agreement">
+        <label className={`checkbox-agreement ${showCheckboxError ? 'error' : ''}`}>
           <input
             type="checkbox"
             checked={formData.step6.agreedToTerms}
             onChange={handleAgreementChange}
           />
           <span className="checkbox-label">
-            I certify that all information provided is accurate and complete to the best of my knowledge
+            I certify that all information provided is accurate and complete to the best of my knowledge <span className="required">*</span>
           </span>
         </label>
+        {showCheckboxError && (
+          <span className="error-message">Please check this box to confirm before submitting</span>
+        )}
         <p className="submit-note">
           By submitting this form, you agree to our terms and conditions. DNV will review your application and contact you within 2-3 business days.
         </p>

@@ -11,6 +11,7 @@ export const useFormContext = () => {
 };
 
 export const FormProvider = ({ children }) => {
+  const [validationTrigger, setValidationTrigger] = useState({ step: 0, count: 0 });
   const [formData, setFormData] = useState({
     // Step 1: DNV Quote Request
     step1: {
@@ -99,10 +100,10 @@ export const FormProvider = ({ children }) => {
     zipCode: /^\d{5}(-\d{4})?$/,  // 12345 or 12345-6789
   };
 
-  // Helper to validate phone has at least 10 digits
+  // Helper to validate phone has exactly 10 digits
   const isValidPhone = (phone) => {
     const digits = phone.replace(/\D/g, ''); // Remove non-digits
-    return digits.length >= 10;
+    return digits.length === 10;
   };
 
   // Validate specific step
@@ -124,12 +125,12 @@ export const FormProvider = ({ children }) => {
         return formData.step2.facilityType !== '';
       
       case 3:
-        // Only validate CEO contact (first contact) - others are optional
+        // Validate CEO contact (required)
         const ceoContact = formData.step3.leadershipContacts[0];
         if (!ceoContact) return false;
         
         const ceoNameParts = ceoContact.name.trim().split(' ');
-        return (
+        const ceoValid = (
           ceoNameParts.length >= 2 &&
           ceoNameParts[0] !== '' &&
           ceoNameParts[1] !== '' &&
@@ -138,15 +139,42 @@ export const FormProvider = ({ children }) => {
           ceoContact.email.trim() !== '' &&
           patterns.email.test(ceoContact.email)
         );
+
+        // Validate Invoicing contact (required)
+        const invoicingContact = formData.step3.leadershipContacts[2];
+        if (!invoicingContact) return false;
+        
+        const invoicingNameParts = invoicingContact.name.trim().split(' ');
+        const invoicingValid = (
+          invoicingNameParts.length >= 2 &&
+          invoicingNameParts[0] !== '' &&
+          invoicingNameParts[1] !== '' &&
+          invoicingContact.workPhone.trim() !== '' &&
+          isValidPhone(invoicingContact.workPhone) &&
+          invoicingContact.email.trim() !== '' &&
+          patterns.email.test(invoicingContact.email)
+        );
+
+        // Validate billing address (required) - check individual fields
+        const billing = formData.step3.billingAddress;
+        const isValidZip = /^\d{5}(-\d{4})?$/.test(billing.zipCode || '');
+        const billingValid = (
+          billing.streetAddress && billing.streetAddress.trim() !== '' &&
+          billing.city && billing.city.trim() !== '' &&
+          billing.state && billing.state.trim() !== '' &&
+          billing.zipCode && billing.zipCode.trim() !== '' &&
+          isValidZip
+        );
+
+        return ceoValid && invoicingValid && billingValid;
       
       case 4:
-        return formData.step4.siteConfiguration !== '';
+        // Stage 4 is optional - no asterisks in Figma
+        return true;
       
       case 5:
-        return (
-          formData.step5.services.length > 0 &&
-          formData.step5.standards.length > 0
-        );
+        // Stage 5 is optional - no asterisks in Figma
+        return true;
       
       case 6:
         return formData.step6.agreedToTerms === true;
@@ -211,6 +239,10 @@ export const FormProvider = ({ children }) => {
     });
   };
 
+  const triggerValidation = (step) => {
+    setValidationTrigger(prev => ({ step, count: prev.count + 1 }));
+  };
+
   const value = {
     formData,
     updateFormData,
@@ -218,6 +250,8 @@ export const FormProvider = ({ children }) => {
     getAllFormData,
     resetForm,
     validateStep,
+    triggerValidation,
+    validationTrigger,
     patterns,
   };
 

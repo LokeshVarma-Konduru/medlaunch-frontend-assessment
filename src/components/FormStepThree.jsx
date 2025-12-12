@@ -3,7 +3,7 @@ import { useFormContext } from '../context/FormContext';
 import './FormStepThree.css';
 
 function FormStepThree() {
-  const { formData, updateFormData } = useFormContext();
+  const { formData, updateFormData, validationTrigger } = useFormContext();
   
   // Load CEO data from context
   const ceoContact = formData?.step3?.leadershipContacts?.[0] || {};
@@ -15,6 +15,24 @@ function FormStepThree() {
     email: ceoContact.email || '',
     sameAsPrimary: ceoContact.sameAsPrimary || false,
   });
+
+  // Error states
+  const [errors, setErrors] = useState({
+    ceoFirstName: '',
+    ceoLastName: '',
+    ceoPhone: '',
+    ceoEmail: '',
+    invoicingFirstName: '',
+    invoicingLastName: '',
+    invoicingPhone: '',
+    invoicingEmail: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    zipCode: '',
+  });
+
+  const [touched, setTouched] = useState({});
 
   // Load Director data from context
   const directorContact = formData?.step3?.leadershipContacts?.[1] || {};
@@ -48,6 +66,62 @@ function FormStepThree() {
     zipCode: addressParts[2]?.split(' ')[1] || '',
   });
 
+  // Validation functions
+  const validateField = (name, value) => {
+    let error = '';
+
+    switch (name) {
+      case 'ceoFirstName':
+      case 'ceoLastName':
+      case 'invoicingFirstName':
+      case 'invoicingLastName':
+      case 'streetAddress':
+      case 'city':
+      case 'state':
+        if (!value.trim()) {
+          error = 'This field is required';
+        }
+        break;
+
+      case 'ceoPhone':
+      case 'invoicingPhone':
+        if (!value.trim()) {
+          error = 'Phone is required';
+        } else if (!/^\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/.test(value)) {
+          error = 'Please enter a valid 10-digit phone number';
+        }
+        break;
+
+      case 'ceoEmail':
+      case 'invoicingEmail':
+        if (!value.trim()) {
+          error = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Please enter a valid email address';
+        }
+        break;
+
+      case 'zipCode':
+        if (!value.trim()) {
+          error = 'Zip code is required';
+        } else if (!/^\d{5}(-\d{4})?$/.test(value)) {
+          error = 'Please enter a valid zip code';
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    return error;
+  };
+
+  const handleBlur = (name, value) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
   // Handle "Same as Primary Contact" checkboxes
   useEffect(() => {
     if (ceoData.sameAsPrimary) {
@@ -58,6 +132,15 @@ function FormStepThree() {
         lastName: lastName || '',
         phone: formData.step1.primaryContact.workPhone,
         email: formData.step1.primaryContact.email,
+      }));
+      
+      // Clear errors for these fields when auto-filled
+      setErrors(prev => ({
+        ...prev,
+        ceoFirstName: '',
+        ceoLastName: '',
+        ceoPhone: '',
+        ceoEmail: '',
       }));
     } else {
       // Clear fields when unchecked
@@ -81,6 +164,15 @@ function FormStepThree() {
         phone: formData.step1.primaryContact.workPhone,
         email: formData.step1.primaryContact.email,
       }));
+      
+      // Clear errors for these fields when auto-filled (Director is optional, but clear anyway)
+      setErrors(prev => ({
+        ...prev,
+        directorFirstName: '',
+        directorLastName: '',
+        directorPhone: '',
+        directorEmail: '',
+      }));
     } else {
       // Clear fields when unchecked
       setDirectorData(prev => ({
@@ -103,6 +195,15 @@ function FormStepThree() {
         phone: formData.step1.primaryContact.workPhone,
         email: formData.step1.primaryContact.email,
       }));
+      
+      // Clear errors for these fields when auto-filled
+      setErrors(prev => ({
+        ...prev,
+        invoicingFirstName: '',
+        invoicingLastName: '',
+        invoicingPhone: '',
+        invoicingEmail: '',
+      }));
     } else {
       // Clear fields when unchecked
       setInvoicingData(prev => ({
@@ -114,6 +215,63 @@ function FormStepThree() {
       }));
     }
   }, [invoicingData.sameAsPrimary, formData.step1.primaryContact]);
+
+  // Track previous validation trigger to detect changes
+  const [prevTrigger, setPrevTrigger] = useState(0);
+  
+  // Listen for validation trigger - validate all required fields
+  useEffect(() => {
+    // Only validate if this trigger is for Step 3
+    if (validationTrigger.step === 3 && validationTrigger.count > prevTrigger) {
+      setPrevTrigger(validationTrigger.count);
+      const requiredFields = [
+        'ceoFirstName', 'ceoLastName', 'ceoPhone', 'ceoEmail',
+        'invoicingFirstName', 'invoicingLastName', 'invoicingPhone', 'invoicingEmail',
+        'streetAddress', 'city', 'state', 'zipCode'
+      ];
+      
+      const newErrors = {};
+      const newTouched = {};
+      
+      // Validate CEO fields
+      ['ceoFirstName', 'ceoLastName', 'ceoPhone', 'ceoEmail'].forEach(field => {
+        const fieldKey = field.replace('ceo', '').toLowerCase();
+        const value = ceoData[fieldKey === 'firstname' ? 'firstName' : fieldKey === 'lastname' ? 'lastName' : fieldKey];
+        const error = validateField(field, value);
+        newErrors[field] = error;
+        newTouched[field] = true;
+      });
+      
+      // Validate Invoicing fields
+      ['invoicingFirstName', 'invoicingLastName', 'invoicingPhone', 'invoicingEmail'].forEach(field => {
+        const fieldKey = field.replace('invoicing', '').toLowerCase();
+        const value = invoicingData[fieldKey === 'firstname' ? 'firstName' : fieldKey === 'lastname' ? 'lastName' : fieldKey];
+        const error = validateField(field, value);
+        newErrors[field] = error;
+        newTouched[field] = true;
+      });
+      
+      // Validate Billing Address fields
+      ['streetAddress', 'city', 'state', 'zipCode'].forEach(field => {
+        const value = billingAddress[field];
+        const error = validateField(field, value);
+        newErrors[field] = error;
+        newTouched[field] = true;
+      });
+      
+      setErrors(prev => ({ ...prev, ...newErrors }));
+      setTouched(prev => ({ ...prev, ...newTouched }));
+      
+      // Scroll to first error
+      setTimeout(() => {
+        const firstError = document.querySelector('.form-input.error');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstError.focus();
+        }
+      }, 100);
+    }
+  }, [validationTrigger]);
 
   // Update context whenever local data changes
   useEffect(() => {
@@ -156,6 +314,10 @@ function FormStepThree() {
       billingAddress: {
         sameAsPrimary: false,
         address: formattedAddress,
+        streetAddress: billingAddress.streetAddress,
+        city: billingAddress.city,
+        state: billingAddress.state,
+        zipCode: billingAddress.zipCode,
       },
     });
   }, [ceoData, directorData, invoicingData, billingAddress]);
@@ -188,10 +350,20 @@ function FormStepThree() {
                 id="ceoFirstName"
                 name="ceoFirstName"
                 type="text"
-                className="form-input"
+                className={`form-input ${errors.ceoFirstName && touched.ceoFirstName ? 'error' : ''}`}
                 value={ceoData.firstName}
-                onChange={(e) => setCeoData(prev => ({ ...prev, firstName: e.target.value }))}
+                onChange={(e) => {
+                  setCeoData(prev => ({ ...prev, firstName: e.target.value }));
+                  if (touched.ceoFirstName) {
+                    const error = validateField('ceoFirstName', e.target.value);
+                    setErrors(prev => ({ ...prev, ceoFirstName: error }));
+                  }
+                }}
+                onBlur={(e) => handleBlur('ceoFirstName', e.target.value)}
               />
+              {errors.ceoFirstName && touched.ceoFirstName && (
+                <span className="error-message">{errors.ceoFirstName}</span>
+              )}
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="ceoLastName">
@@ -201,10 +373,20 @@ function FormStepThree() {
                 id="ceoLastName"
                 name="ceoLastName"
                 type="text"
-                className="form-input"
+                className={`form-input ${errors.ceoLastName && touched.ceoLastName ? 'error' : ''}`}
                 value={ceoData.lastName}
-                onChange={(e) => setCeoData(prev => ({ ...prev, lastName: e.target.value }))}
+                onChange={(e) => {
+                  setCeoData(prev => ({ ...prev, lastName: e.target.value }));
+                  if (touched.ceoLastName) {
+                    const error = validateField('ceoLastName', e.target.value);
+                    setErrors(prev => ({ ...prev, ceoLastName: error }));
+                  }
+                }}
+                onBlur={(e) => handleBlur('ceoLastName', e.target.value)}
               />
+              {errors.ceoLastName && touched.ceoLastName && (
+                <span className="error-message">{errors.ceoLastName}</span>
+              )}
             </div>
           </div>
 
@@ -216,10 +398,20 @@ function FormStepThree() {
               id="ceoPhone"
               name="ceoPhone"
               type="tel"
-              className="form-input"
+              className={`form-input ${errors.ceoPhone && touched.ceoPhone ? 'error' : ''}`}
               value={ceoData.phone}
-              onChange={(e) => setCeoData(prev => ({ ...prev, phone: e.target.value }))}
+              onChange={(e) => {
+                setCeoData(prev => ({ ...prev, phone: e.target.value }));
+                if (touched.ceoPhone) {
+                  const error = validateField('ceoPhone', e.target.value);
+                  setErrors(prev => ({ ...prev, ceoPhone: error }));
+                }
+              }}
+              onBlur={(e) => handleBlur('ceoPhone', e.target.value)}
             />
+            {errors.ceoPhone && touched.ceoPhone && (
+              <span className="error-message">{errors.ceoPhone}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -230,10 +422,20 @@ function FormStepThree() {
               id="ceoEmail"
               name="ceoEmail"
               type="email"
-              className="form-input"
+              className={`form-input ${errors.ceoEmail && touched.ceoEmail ? 'error' : ''}`}
               value={ceoData.email}
-              onChange={(e) => setCeoData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) => {
+                setCeoData(prev => ({ ...prev, email: e.target.value }));
+                if (touched.ceoEmail) {
+                  const error = validateField('ceoEmail', e.target.value);
+                  setErrors(prev => ({ ...prev, ceoEmail: error }));
+                }
+              }}
+              onBlur={(e) => handleBlur('ceoEmail', e.target.value)}
             />
+            {errors.ceoEmail && touched.ceoEmail && (
+              <span className="error-message">{errors.ceoEmail}</span>
+            )}
           </div>
         </div>
 
@@ -332,10 +534,20 @@ function FormStepThree() {
                 id="invoicingFirstName"
                 name="invoicingFirstName"
                 type="text"
-                className="form-input"
+                className={`form-input ${errors.invoicingFirstName && touched.invoicingFirstName ? 'error' : ''}`}
                 value={invoicingData.firstName}
-                onChange={(e) => setInvoicingData(prev => ({ ...prev, firstName: e.target.value }))}
+                onChange={(e) => {
+                  setInvoicingData(prev => ({ ...prev, firstName: e.target.value }));
+                  if (touched.invoicingFirstName) {
+                    const error = validateField('invoicingFirstName', e.target.value);
+                    setErrors(prev => ({ ...prev, invoicingFirstName: error }));
+                  }
+                }}
+                onBlur={(e) => handleBlur('invoicingFirstName', e.target.value)}
               />
+              {errors.invoicingFirstName && touched.invoicingFirstName && (
+                <span className="error-message">{errors.invoicingFirstName}</span>
+              )}
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="invoicingLastName">
@@ -345,10 +557,20 @@ function FormStepThree() {
                 id="invoicingLastName"
                 name="invoicingLastName"
                 type="text"
-                className="form-input"
+                className={`form-input ${errors.invoicingLastName && touched.invoicingLastName ? 'error' : ''}`}
                 value={invoicingData.lastName}
-                onChange={(e) => setInvoicingData(prev => ({ ...prev, lastName: e.target.value }))}
+                onChange={(e) => {
+                  setInvoicingData(prev => ({ ...prev, lastName: e.target.value }));
+                  if (touched.invoicingLastName) {
+                    const error = validateField('invoicingLastName', e.target.value);
+                    setErrors(prev => ({ ...prev, invoicingLastName: error }));
+                  }
+                }}
+                onBlur={(e) => handleBlur('invoicingLastName', e.target.value)}
               />
+              {errors.invoicingLastName && touched.invoicingLastName && (
+                <span className="error-message">{errors.invoicingLastName}</span>
+              )}
             </div>
           </div>
 
@@ -360,10 +582,20 @@ function FormStepThree() {
               id="invoicingPhone"
               name="invoicingPhone"
               type="tel"
-              className="form-input"
+              className={`form-input ${errors.invoicingPhone && touched.invoicingPhone ? 'error' : ''}`}
               value={invoicingData.phone}
-              onChange={(e) => setInvoicingData(prev => ({ ...prev, phone: e.target.value }))}
+              onChange={(e) => {
+                setInvoicingData(prev => ({ ...prev, phone: e.target.value }));
+                if (touched.invoicingPhone) {
+                  const error = validateField('invoicingPhone', e.target.value);
+                  setErrors(prev => ({ ...prev, invoicingPhone: error }));
+                }
+              }}
+              onBlur={(e) => handleBlur('invoicingPhone', e.target.value)}
             />
+            {errors.invoicingPhone && touched.invoicingPhone && (
+              <span className="error-message">{errors.invoicingPhone}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -374,10 +606,20 @@ function FormStepThree() {
               id="invoicingEmail"
               name="invoicingEmail"
               type="email"
-              className="form-input"
+              className={`form-input ${errors.invoicingEmail && touched.invoicingEmail ? 'error' : ''}`}
               value={invoicingData.email}
-              onChange={(e) => setInvoicingData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) => {
+                setInvoicingData(prev => ({ ...prev, email: e.target.value }));
+                if (touched.invoicingEmail) {
+                  const error = validateField('invoicingEmail', e.target.value);
+                  setErrors(prev => ({ ...prev, invoicingEmail: error }));
+                }
+              }}
+              onBlur={(e) => handleBlur('invoicingEmail', e.target.value)}
             />
+            {errors.invoicingEmail && touched.invoicingEmail && (
+              <span className="error-message">{errors.invoicingEmail}</span>
+            )}
           </div>
 
           {/* Billing Address Sub-section */}
@@ -392,10 +634,20 @@ function FormStepThree() {
                 id="streetAddress"
                 name="streetAddress"
                 type="text"
-                className="form-input"
+                className={`form-input ${errors.streetAddress && touched.streetAddress ? 'error' : ''}`}
                 value={billingAddress.streetAddress}
-                onChange={(e) => setBillingAddress(prev => ({ ...prev, streetAddress: e.target.value }))}
+                onChange={(e) => {
+                  setBillingAddress(prev => ({ ...prev, streetAddress: e.target.value }));
+                  if (touched.streetAddress) {
+                    const error = validateField('streetAddress', e.target.value);
+                    setErrors(prev => ({ ...prev, streetAddress: error }));
+                  }
+                }}
+                onBlur={(e) => handleBlur('streetAddress', e.target.value)}
               />
+              {errors.streetAddress && touched.streetAddress && (
+                <span className="error-message">{errors.streetAddress}</span>
+              )}
             </div>
 
             <div className="form-row form-row-three">
@@ -407,10 +659,20 @@ function FormStepThree() {
                   id="city"
                   name="city"
                   type="text"
-                  className="form-input"
+                  className={`form-input ${errors.city && touched.city ? 'error' : ''}`}
                   value={billingAddress.city}
-                  onChange={(e) => setBillingAddress(prev => ({ ...prev, city: e.target.value }))}
+                  onChange={(e) => {
+                    setBillingAddress(prev => ({ ...prev, city: e.target.value }));
+                    if (touched.city) {
+                      const error = validateField('city', e.target.value);
+                      setErrors(prev => ({ ...prev, city: error }));
+                    }
+                  }}
+                  onBlur={(e) => handleBlur('city', e.target.value)}
                 />
+                {errors.city && touched.city && (
+                  <span className="error-message">{errors.city}</span>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="state">
@@ -419,9 +681,16 @@ function FormStepThree() {
                 <select
                   id="state"
                   name="state"
-                  className="form-input"
+                  className={`form-input ${errors.state && touched.state ? 'error' : ''}`}
                   value={billingAddress.state}
-                  onChange={(e) => setBillingAddress(prev => ({ ...prev, state: e.target.value }))}
+                  onChange={(e) => {
+                    setBillingAddress(prev => ({ ...prev, state: e.target.value }));
+                    if (touched.state) {
+                      const error = validateField('state', e.target.value);
+                      setErrors(prev => ({ ...prev, state: error }));
+                    }
+                  }}
+                  onBlur={(e) => handleBlur('state', e.target.value)}
                 >
                   <option value="">Select State</option>
                   <option value="AL">Alabama</option>
@@ -436,6 +705,9 @@ function FormStepThree() {
                   <option value="GA">Georgia</option>
                   {/* Add more states as needed */}
                 </select>
+                {errors.state && touched.state && (
+                  <span className="error-message">{errors.state}</span>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label" htmlFor="zipCode">
@@ -445,10 +717,20 @@ function FormStepThree() {
                   id="zipCode"
                   name="zipCode"
                   type="text"
-                  className="form-input"
+                  className={`form-input ${errors.zipCode && touched.zipCode ? 'error' : ''}`}
                   value={billingAddress.zipCode}
-                  onChange={(e) => setBillingAddress(prev => ({ ...prev, zipCode: e.target.value }))}
+                  onChange={(e) => {
+                    setBillingAddress(prev => ({ ...prev, zipCode: e.target.value }));
+                    if (touched.zipCode) {
+                      const error = validateField('zipCode', e.target.value);
+                      setErrors(prev => ({ ...prev, zipCode: error }));
+                    }
+                  }}
+                  onBlur={(e) => handleBlur('zipCode', e.target.value)}
                 />
+                {errors.zipCode && touched.zipCode && (
+                  <span className="error-message">{errors.zipCode}</span>
+                )}
               </div>
             </div>
           </div>

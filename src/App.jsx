@@ -22,7 +22,7 @@ const steps = [
 ];
 
 function App() {
-  const { getAllFormData, validateStep } = useFormContext();
+  const { getAllFormData, validateStep, triggerValidation } = useFormContext();
   const [currentStep, setCurrentStep] = useState(1);
 
   // Scroll to top whenever step changes
@@ -39,7 +39,10 @@ function App() {
   const handleContinue = () => {
     // Validate current step before proceeding
     if (!validateStep(currentStep)) {
-      alert('Please fill in all required fields correctly before continuing.');
+      // Trigger validation to show all errors for current step
+      triggerValidation(currentStep);
+      // Scroll to top to see error messages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -49,6 +52,10 @@ function App() {
     } else if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
+  };
+
+  const handleExit = () => {
+    // Exit button does nothing - just for UI purposes
   };
 
   const handleSave = () => {
@@ -116,6 +123,7 @@ function App() {
             onPrevious={handlePrevious}
             onSave={handleSave}
             onContinue={handleContinue}
+            onExit={handleExit}
           />
       </div>
       </main>

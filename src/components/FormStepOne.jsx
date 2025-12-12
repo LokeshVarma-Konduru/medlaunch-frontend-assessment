@@ -3,7 +3,7 @@ import { useFormContext } from '../context/FormContext';
 import './FormStepOne.css';
 
 function FormStepOne() {
-  const { formData, updateFormData, updateNestedFormData } = useFormContext();
+  const { formData, updateFormData, updateNestedFormData, validationTrigger } = useFormContext();
   const [localData, setLocalData] = useState({
     legalEntityName: formData.step1.legalEntityName || '',
     dbaName: formData.step1.dbaName || '',
@@ -15,6 +15,51 @@ function FormStepOne() {
     cellPhone: formData.step1.primaryContact.cellPhone || '',
     email: formData.step1.primaryContact.email || '',
   });
+
+  const [errors, setErrors] = useState({
+    legalEntityName: '',
+    dbaName: '',
+    firstName: '',
+    lastName: '',
+    title: '',
+    workPhone: '',
+    email: '',
+  });
+
+  const [touched, setTouched] = useState({});
+  
+  // Track previous validation trigger to detect changes
+  const [prevTrigger, setPrevTrigger] = useState(0);
+
+  // Listen for validation trigger - validate all fields
+  useEffect(() => {
+    // Only validate if this trigger is for Step 1
+    if (validationTrigger.step === 1 && validationTrigger.count > prevTrigger) {
+      setPrevTrigger(validationTrigger.count);
+      const requiredFields = ['legalEntityName', 'dbaName', 'firstName', 'lastName', 'title', 'workPhone', 'email'];
+      const newErrors = {};
+      const newTouched = {};
+      
+      requiredFields.forEach(field => {
+        const value = localData[field];
+        const error = validateField(field, value);
+        newErrors[field] = error;
+        newTouched[field] = true;
+      });
+      
+      setErrors(prev => ({ ...prev, ...newErrors }));
+      setTouched(prev => ({ ...prev, ...newTouched }));
+      
+      // Scroll to first error
+      setTimeout(() => {
+        const firstError = document.querySelector('.form-input.error');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstError.focus();
+        }
+      }, 100);
+    }
+  }, [validationTrigger]);
 
   // Handle "Same as Legal Entity Name" checkbox
   useEffect(() => {
@@ -43,12 +88,65 @@ function FormStepOne() {
     });
   }, [localData]);
 
+  // Validation functions
+  const validateField = (name, value) => {
+    let error = '';
+
+    switch (name) {
+      case 'legalEntityName':
+      case 'dbaName':
+      case 'firstName':
+      case 'lastName':
+      case 'title':
+        if (!value.trim()) {
+          error = 'This field is required';
+        }
+        break;
+
+      case 'workPhone':
+        if (!value.trim()) {
+          error = 'Work phone is required';
+        } else if (!/^\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/.test(value)) {
+          error = 'Please enter a valid 10-digit phone number';
+        }
+        break;
+
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Please enter a valid email address';
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    return error;
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    
     setLocalData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: newValue,
     }));
+
+    // Clear error when user starts typing
+    if (touched[name]) {
+      const error = validateField(name, newValue);
+      setErrors(prev => ({ ...prev, [name]: error }));
+    }
   };
 
   return (
@@ -64,11 +162,15 @@ function FormStepOne() {
             id="legalEntity"
             name="legalEntityName"
             type="text"
-            className="form-input"
+            className={`form-input ${errors.legalEntityName && touched.legalEntityName ? 'error' : ''}`}
             placeholder=""
             value={localData.legalEntityName}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
+          {errors.legalEntityName && touched.legalEntityName && (
+            <span className="error-message">{errors.legalEntityName}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -79,11 +181,15 @@ function FormStepOne() {
             id="doingBusinessAs"
             name="dbaName"
             type="text"
-            className="form-input"
+            className={`form-input ${errors.dbaName && touched.dbaName ? 'error' : ''}`}
             placeholder=""
             value={localData.dbaName}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
+          {errors.dbaName && touched.dbaName && (
+            <span className="error-message">{errors.dbaName}</span>
+          )}
           
           <label className="checkbox">
             <input 
@@ -114,10 +220,14 @@ function FormStepOne() {
               id="firstName" 
               name="firstName" 
               type="text" 
-              className="form-input"
+              className={`form-input ${errors.firstName && touched.firstName ? 'error' : ''}`}
               value={localData.firstName}
               onChange={handleChange}
+              onBlur={handleBlur}
             />
+            {errors.firstName && touched.firstName && (
+              <span className="error-message">{errors.firstName}</span>
+            )}
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="lastName">
@@ -127,10 +237,14 @@ function FormStepOne() {
               id="lastName" 
               name="lastName" 
               type="text" 
-              className="form-input"
+              className={`form-input ${errors.lastName && touched.lastName ? 'error' : ''}`}
               value={localData.lastName}
               onChange={handleChange}
+              onBlur={handleBlur}
             />
+            {errors.lastName && touched.lastName && (
+              <span className="error-message">{errors.lastName}</span>
+            )}
           </div>
         </div>
 
@@ -142,10 +256,14 @@ function FormStepOne() {
             id="title" 
             name="title" 
             type="text" 
-            className="form-input"
+            className={`form-input ${errors.title && touched.title ? 'error' : ''}`}
             value={localData.title}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
+          {errors.title && touched.title && (
+            <span className="error-message">{errors.title}</span>
+          )}
         </div>
 
         <div className="form-row">
@@ -157,10 +275,14 @@ function FormStepOne() {
               id="workPhone" 
               name="workPhone" 
               type="tel" 
-              className="form-input"
+              className={`form-input ${errors.workPhone && touched.workPhone ? 'error' : ''}`}
               value={localData.workPhone}
               onChange={handleChange}
+              onBlur={handleBlur}
             />
+            {errors.workPhone && touched.workPhone && (
+              <span className="error-message">{errors.workPhone}</span>
+            )}
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="cellPhone">
@@ -190,10 +312,14 @@ function FormStepOne() {
             id="email" 
             name="email" 
             type="email" 
-            className="form-input"
+            className={`form-input ${errors.email && touched.email ? 'error' : ''}`}
             value={localData.email}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
+          {errors.email && touched.email && (
+            <span className="error-message">{errors.email}</span>
+          )}
           <div className="email-actions">
             <button type="button" className="link-button">
               Send Verification Email

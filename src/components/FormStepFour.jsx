@@ -6,7 +6,14 @@ function FormStepFour() {
   const { formData, updateFormData } = useFormContext();
   const [selectedOption, setSelectedOption] = useState(formData.step4.siteConfiguration || '');
   const [uploadMethod, setUploadMethod] = useState(formData.step4.inputMethod || '');
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  // Initialize uploaded files from formData if they exist
+  const [uploadedFiles, setUploadedFiles] = useState(() => {
+    if (formData.step4.uploadedFileData) {
+      // Restore saved file data
+      return [formData.step4.uploadedFileData];
+    }
+    return [];
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -16,15 +23,11 @@ function FormStepFour() {
     updateFormData('step4', {
       siteConfiguration: selectedOption,
       inputMethod: uploadMethod,
-      locations: uploadedFiles.map(file => ({
-        name: file.name,
-        address: 'Pending file processing',
-        ftes: 0,
-        shifts: 0,
-        milesToMain: 0,
-        daysOpen: 'Pending'
-      })),
+      locations: uploadedFiles.length > 0 && uploadedFiles[0].locations 
+        ? uploadedFiles[0].locations 
+        : [],
       uploadedFile: uploadedFiles.length > 0 ? uploadedFiles[0].name : null,
+      uploadedFileData: uploadedFiles.length > 0 ? uploadedFiles[0] : null,
     });
   }, [selectedOption, uploadMethod, uploadedFiles]);
 
@@ -183,6 +186,10 @@ function FormStepFour() {
 
   const handleRemoveFile = (fileId) => {
     setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+    // Reset file input so user can re-upload the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSelectFile = () => {
@@ -195,39 +202,25 @@ function FormStepFour() {
         <h2 className="section-title">Do you have multiple sites or locations?</h2>
 
         <div className="option-cards">
-          <label 
+          <div 
             className={`option-card ${selectedOption === 'single' ? 'selected' : ''}`}
-            onClick={() => setSelectedOption('single')}
+            onClick={() => setSelectedOption(selectedOption === 'single' ? '' : 'single')}
           >
-            <input
-              type="radio"
-              name="siteType"
-              value="single"
-              checked={selectedOption === 'single'}
-              onChange={() => setSelectedOption('single')}
-            />
             <div className="option-content">
               <h3 className="option-title">Single Location</h3>
               <p className="option-description">We operate from one facility only</p>
             </div>
-          </label>
+          </div>
 
-          <label 
+          <div 
             className={`option-card ${selectedOption === 'multiple' ? 'selected' : ''}`}
-            onClick={() => setSelectedOption('multiple')}
+            onClick={() => setSelectedOption(selectedOption === 'multiple' ? '' : 'multiple')}
           >
-            <input
-              type="radio"
-              name="siteType"
-              value="multiple"
-              checked={selectedOption === 'multiple'}
-              onChange={() => setSelectedOption('multiple')}
-            />
             <div className="option-content">
               <h3 className="option-title">Multiple Locations</h3>
               <p className="option-description">We have multiple facilities or practice locations</p>
             </div>
-          </label>
+          </div>
         </div>
       </section>
 
@@ -237,22 +230,15 @@ function FormStepFour() {
           <h2 className="section-title">How would you like to add your site information?</h2>
 
           <div className="upload-method-card">
-            <label 
+            <div 
               className={`upload-option ${uploadMethod === 'file-upload' ? 'selected' : ''}`}
-              onClick={() => setUploadMethod('file-upload')}
+              onClick={() => setUploadMethod(uploadMethod === 'file-upload' ? '' : 'file-upload')}
             >
-              <input
-                type="radio"
-                name="uploadMethod"
-                value="file-upload"
-                checked={uploadMethod === 'file-upload'}
-                onChange={() => setUploadMethod('file-upload')}
-              />
               <div className="upload-option-content">
                 <h3 className="upload-option-title">Upload CSV / Excel</h3>
                 <p className="upload-option-description">Upload a spreadsheet with all site information</p>
               </div>
-            </label>
+            </div>
           </div>
 
           {/* Show upload area when CSV option is selected */}
@@ -305,9 +291,7 @@ function FormStepFour() {
                   {uploadedFiles.map(file => (
                     <div key={file.id} className="file-item completed">
                       <div className="file-icon">
-                        <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 0H2C0.9 0 0 0.9 0 2V22C0 23.1 0.9 24 2 24H18C19.1 24 20 23.1 20 22V8L12 0Z" fill="#0056A3"/>
-                        </svg>
+                        <img src="/Document.svg" alt="Document" width="24" height="24" />
                       </div>
                       <div className="file-info">
                         <span className="file-name">{file.name}</span>
@@ -332,9 +316,7 @@ function FormStepFour() {
                   {uploadingFiles.map(file => (
                     <div key={file.id} className="file-item uploading">
                       <div className="file-icon">
-                        <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 0H2C0.9 0 0 0.9 0 2V22C0 23.1 0.9 24 2 24H18C19.1 24 20 23.1 20 22V8L12 0Z" fill="#0056A3"/>
-                        </svg>
+                        <img src="/Document.svg" alt="Document" width="24" height="24" />
                       </div>
                       <div className="file-details-uploading">
                         <div className="file-top-row">

@@ -236,7 +236,7 @@
 /* Dates List */
 .dates-list {
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 700;
   color: #0056A3;
   line-height: 1.6;
   margin: 0;
@@ -264,7 +264,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   cursor: pointer;
 }
 
@@ -284,6 +284,10 @@
   line-height: 1;
   font-family: 'Nunito Sans', sans-serif;
   letter-spacing: 0px;
+}
+
+.checkbox-agreement + .error-message {
+  margin-bottom: 16px;
 }
 
 .submit-note {
@@ -314,7 +318,7 @@
 .btn-outline {
   background-color: transparent;
   color: #0056A3;
-  border: 1.5px solid #0056A3;
+  border: 1.5px dashed #0056A3;
 }
 
 .btn-outline:hover {

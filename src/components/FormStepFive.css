@@ -277,7 +277,7 @@
 .pill-light {
   background-color: #FFFFFF;
   border: 1.5px solid #0056A3;
-  color: #0056A3;
+  color: #1A3A70;
 }
 
 .pill-remove {
@@ -297,11 +297,13 @@
 }
 
 .pill-remove-light {
-  color: #0056A3;
+  color: #1A3A70;
+  font-weight: 800;
+  font-size: 16px;
 }
 
 .pill-remove-light:hover {
-  background-color: rgba(0, 86, 163, 0.1);
+  background-color: rgba(26, 58, 112, 0.1);
 }
 
 /* Solid Pills (for Dates) */
