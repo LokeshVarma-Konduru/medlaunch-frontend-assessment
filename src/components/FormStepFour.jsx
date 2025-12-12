@@ -6,10 +6,8 @@ function FormStepFour() {
   const { formData, updateFormData } = useFormContext();
   const [selectedOption, setSelectedOption] = useState(formData.step4.siteConfiguration || '');
   const [uploadMethod, setUploadMethod] = useState(formData.step4.inputMethod || '');
-  // Initialize uploaded files from formData if they exist
   const [uploadedFiles, setUploadedFiles] = useState(() => {
     if (formData.step4.uploadedFileData) {
-      // Restore saved file data
       return [formData.step4.uploadedFileData];
     }
     return [];
@@ -18,7 +16,6 @@ function FormStepFour() {
   const [uploadingFiles, setUploadingFiles] = useState([]);
   const fileInputRef = useRef(null);
 
-  // Update context when selections change
   useEffect(() => {
     updateFormData('step4', {
       siteConfiguration: selectedOption,
@@ -31,7 +28,6 @@ function FormStepFour() {
     });
   }, [selectedOption, uploadMethod, uploadedFiles]);
 
-  // Parse CSV file
   const parseCSV = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();

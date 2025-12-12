@@ -27,13 +27,9 @@ function FormStepOne() {
   });
 
   const [touched, setTouched] = useState({});
-  
-  // Track previous validation trigger to detect changes
   const [prevTrigger, setPrevTrigger] = useState(0);
 
-  // Listen for validation trigger - validate all fields
   useEffect(() => {
-    // Only validate if this trigger is for Step 1
     if (validationTrigger.step === 1 && validationTrigger.count > prevTrigger) {
       setPrevTrigger(validationTrigger.count);
       const requiredFields = ['legalEntityName', 'dbaName', 'firstName', 'lastName', 'title', 'workPhone', 'email'];
@@ -50,7 +46,6 @@ function FormStepOne() {
       setErrors(prev => ({ ...prev, ...newErrors }));
       setTouched(prev => ({ ...prev, ...newTouched }));
       
-      // Scroll to first error
       setTimeout(() => {
         const firstError = document.querySelector('.form-input.error');
         if (firstError) {
@@ -61,17 +56,20 @@ function FormStepOne() {
     }
   }, [validationTrigger]);
 
-  // Handle "Same as Legal Entity Name" checkbox
   useEffect(() => {
     if (localData.sameAsLegal) {
       setLocalData(prev => ({
         ...prev,
         dbaName: prev.legalEntityName,
       }));
+      
+      setErrors(prev => ({
+        ...prev,
+        dbaName: '',
+      }));
     }
   }, [localData.sameAsLegal, localData.legalEntityName]);
 
-  // Update context whenever local data changes
   useEffect(() => {
     updateFormData('step1', {
       legalEntityName: localData.legalEntityName,
@@ -88,7 +86,6 @@ function FormStepOne() {
     });
   }, [localData]);
 
-  // Validation functions
   const validateField = (name, value) => {
     let error = '';
 
@@ -142,7 +139,6 @@ function FormStepOne() {
       [name]: newValue,
     }));
 
-    // Clear error when user starts typing
     if (touched[name]) {
       const error = validateField(name, newValue);
       setErrors(prev => ({ ...prev, [name]: error }));

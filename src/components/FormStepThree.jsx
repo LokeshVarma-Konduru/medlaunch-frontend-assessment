@@ -5,7 +5,6 @@ import './FormStepThree.css';
 function FormStepThree() {
   const { formData, updateFormData, validationTrigger } = useFormContext();
   
-  // Load CEO data from context
   const ceoContact = formData?.step3?.leadershipContacts?.[0] || {};
   const [ceoFirstName, ceoLastName] = (ceoContact.name || '').split(' ');
   const [ceoData, setCeoData] = useState({
@@ -34,7 +33,6 @@ function FormStepThree() {
 
   const [touched, setTouched] = useState({});
 
-  // Load Director data from context
   const directorContact = formData?.step3?.leadershipContacts?.[1] || {};
   const [dirFirstName, dirLastName] = (directorContact.name || '').split(' ');
   const [directorData, setDirectorData] = useState({
@@ -45,7 +43,6 @@ function FormStepThree() {
     sameAsPrimary: directorContact.sameAsPrimary || false,
   });
 
-  // Load Invoicing data from context
   const invoicingContact = formData?.step3?.leadershipContacts?.[2] || {};
   const [invFirstName, invLastName] = (invoicingContact.name || '').split(' ');
   const [invoicingData, setInvoicingData] = useState({
@@ -56,7 +53,6 @@ function FormStepThree() {
     sameAsPrimary: invoicingContact.sameAsPrimary || false,
   });
 
-  // Load billing address from context
   const savedAddress = formData?.step3?.billingAddress?.address || '';
   const addressParts = savedAddress.split(', ');
   const [billingAddress, setBillingAddress] = useState({
@@ -66,7 +62,6 @@ function FormStepThree() {
     zipCode: addressParts[2]?.split(' ')[1] || '',
   });
 
-  // Validation functions
   const validateField = (name, value) => {
     let error = '';
 
@@ -122,7 +117,6 @@ function FormStepThree() {
     setErrors(prev => ({ ...prev, [name]: error }));
   };
 
-  // Handle "Same as Primary Contact" checkboxes
   useEffect(() => {
     if (ceoData.sameAsPrimary) {
       const [firstName, lastName] = formData.step1.primaryContact.name.split(' ');

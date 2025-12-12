@@ -25,7 +25,6 @@ function App() {
   const { getAllFormData, validateStep, triggerValidation } = useFormContext();
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Scroll to top whenever step changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStep]);
@@ -37,16 +36,12 @@ function App() {
   };
 
   const handleContinue = () => {
-    // Validate current step before proceeding
     if (!validateStep(currentStep)) {
-      // Trigger validation to show all errors for current step
       triggerValidation(currentStep);
-      // Scroll to top to see error messages
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    // If on last step (Review & Submit), handle submission
     if (currentStep === steps.length) {
       handleSubmit();
     } else if (currentStep < steps.length) {
@@ -55,7 +50,7 @@ function App() {
   };
 
   const handleExit = () => {
-    // Exit button does nothing - just for UI purposes
+    // No action required
   };
 
   const handleSave = () => {

@@ -63,30 +63,19 @@ medlaunch-frontend-assessment/
 │   └── vite.svg
 ├── src/
 │   ├── components/
-│   │   ├── ActionBar.jsx
-│   │   ├── ActionBar.css
-│   │   ├── FormStepOne.jsx
-│   │   ├── FormStepOne.css
-│   │   ├── FormStepTwo.jsx
-│   │   ├── FormStepTwo.css
-│   │   ├── FormStepThree.jsx
-│   │   ├── FormStepThree.css
-│   │   ├── FormStepFour.jsx
-│   │   ├── FormStepFour.css
-│   │   ├── FormStepFive.jsx
-│   │   ├── FormStepFive.css
-│   │   ├── FormStepSix.jsx
-│   │   ├── FormStepSix.css
-│   │   ├── Header.jsx
-│   │   ├── Header.css
-│   │   ├── ProgressBar.jsx
-│   │   ├── ProgressBar.css
-│   │   ├── SupportChat.jsx
-│   │   └── SupportChat.css
+│   │   ├── ActionBar.jsx/css
+│   │   ├── FormStepOne.jsx/css
+│   │   ├── FormStepTwo.jsx/css
+│   │   ├── FormStepThree.jsx/css
+│   │   ├── FormStepFour.jsx/css
+│   │   ├── FormStepFive.jsx/css
+│   │   ├── FormStepSix.jsx/css
+│   │   ├── Header.jsx/css
+│   │   ├── ProgressBar.jsx/css
+│   │   └── SupportChat.jsx/css
 │   ├── context/
 │   │   └── FormContext.jsx
-│   ├── App.jsx
-│   ├── App.css
+│   ├── App.jsx/css
 │   ├── index.css
 │   └── main.jsx
 ├── eslint.config.js

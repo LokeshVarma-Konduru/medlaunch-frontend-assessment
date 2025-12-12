@@ -13,11 +13,7 @@ function FormStepSix({ onNavigateToStep }) {
   });
   
   const [showCheckboxError, setShowCheckboxError] = useState(false);
-  // Initialize prevTrigger with current count to avoid showing error on mount
   const [prevTrigger, setPrevTrigger] = useState(validationTrigger?.count || 0);
-
-  // Debug: Log formData to console
-  console.log('FormStepSix - formData:', formData);
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -32,7 +28,6 @@ function FormStepSix({ onNavigateToStep }) {
     }
   };
 
-  // Helper function to get facility type display name
   const getFacilityTypeDisplay = (type) => {
     if (!type) return 'Not selected';
     const types = {
@@ -46,12 +41,10 @@ function FormStepSix({ onNavigateToStep }) {
     return types[type] || type;
   };
 
-  // Check if formData exists
   if (!formData) {
     return <div className="form-step">Loading form data...</div>;
   }
 
-  // Check if form is completely empty (no data filled)
   const isFormEmpty = !formData.step1?.legalEntityName && 
                       !formData.step1?.dbaName && 
                       !formData.step1?.primaryContact?.name &&
@@ -136,7 +129,6 @@ function FormStepSix({ onNavigateToStep }) {
     }
   };
 
-  // Use mock data if form is empty, otherwise use actual data
   const displayData = isFormEmpty ? mockData : {
     basicInfo: {
       legalEntityName: formData?.step1?.legalEntityName || 'Not provided',
@@ -201,17 +193,13 @@ function FormStepSix({ onNavigateToStep }) {
     }
   };
 
-  // Listen for validation trigger - show error if checkbox not checked
   useEffect(() => {
-    // Only validate if this trigger is for Step 6
     if (validationTrigger.step === 6 && validationTrigger.count > prevTrigger) {
       setPrevTrigger(validationTrigger.count);
       
-      // Show error if checkbox not checked
       if (!formData.step6.agreedToTerms) {
         setShowCheckboxError(true);
         
-        // Scroll to checkbox
         setTimeout(() => {
           const checkbox = document.querySelector('.checkbox-agreement');
           if (checkbox) {
@@ -224,7 +212,6 @@ function FormStepSix({ onNavigateToStep }) {
 
   const handleAgreementChange = (e) => {
     updateFormData('step6', { agreedToTerms: e.target.checked });
-    // Clear error when checkbox is checked
     if (e.target.checked) {
       setShowCheckboxError(false);
     }
