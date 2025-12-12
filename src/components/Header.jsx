@@ -12,9 +12,9 @@ function Header() {
         {/* Profile Section */}
         <div className="header-profile">
           <div className="profile-avatar">
-            <span className="profile-initials">KM</span>
+            <span className="profile-initials">LK</span>
           </div>
-          <span className="profile-name">Katherine Martinez</span>
+          <span className="profile-name">Lokesh Konduru</span>
         </div>
       </div>
     </header>
